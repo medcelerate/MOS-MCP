@@ -23,7 +23,19 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 
 // GET /api/status
 func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, s.mgr.Status())
+	s.mu.Lock()
+	profiles := s.cfg.EnabledProfilesString()
+	role := s.cfg.Role
+	s.mu.Unlock()
+	writeJSON(w, http.StatusOK, struct {
+		mos.Status
+		EnabledProfiles string `json:"enabledProfiles"`
+		Role            string `json:"role"`
+	}{
+		Status:          s.mgr.Status(),
+		EnabledProfiles: profiles,
+		Role:            role,
+	})
 }
 
 // GET /api/config, PUT /api/config

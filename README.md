@@ -120,6 +120,73 @@ Selected fields can be overridden via environment variables: `MOSMCP_MOSID`,
 The admin console reads and writes the same config file; changes made in the UI
 are persisted and applied live.
 
+### Setup walkthrough
+
+1. **Copy the example config** and set your identity:
+
+   ```yaml
+   mosID: bridge.yourstation.com   # how this bridge identifies itself
+   ncsID: newsroom.yourstation.com
+   ```
+
+2. **Choose a role:**
+
+   - `client` — you want the AI to reach out to existing MOS devices/NCSs.
+   - `device` — you want the AI to appear *as* a MOS device that an NCS connects to.
+   - `both` — both at once (default).
+
+3. **Enable only the profiles you need.** Each is independent, and MCP tools are
+   registered only for enabled profiles:
+
+   ```yaml
+   profiles: [0, 2]   # e.g. connection + running orders only
+   ```
+
+4. **For `client`/`both`, list the peers to dial.** Ports default to MOS
+   standards, so only override them if a site is non-standard:
+
+   ```yaml
+   peers:
+     - name: vizrt-graphics
+       host: 10.0.0.5
+     - name: enps
+       host: 10.0.0.10
+       lowerPort: 10540
+       upperPort: 10541
+       queryPort: 10542
+   ```
+
+5. **For `device`/`both`, set the listen ports** the NCS will connect to
+   (defaults `10540`/`10541`/`10542`), and describe the device for
+   `reqMachInfo`:
+
+   ```yaml
+   listen:
+     lowerPort: 10540
+     upperPort: 10541
+     queryPort: 10542
+   device:
+     manufacturer: Your Station
+     model: MOS-MCP Bridge
+   ```
+
+6. **Start it, then verify from the console.** Open the admin console, add or
+   confirm a peer, and click **Test** — a green result with the peer's model and
+   profiles confirms connectivity before you wire up an AI client.
+
+> On the MOS side of your network, each real peer must also be configured to
+> talk to this bridge — MOS connections are always mutually, statically
+> configured. Point the peer at this host's IP on the same three ports.
+
+### Security
+
+- The admin console and (by default) the MCP HTTP endpoint bind to **loopback**
+  (`127.0.0.1`). Do not expose them on untrusted networks; there is no built-in
+  authentication. Put them behind a reverse proxy or SSH tunnel if remote access
+  is required.
+- MOS itself is an unauthenticated plaintext protocol — run it only on trusted
+  broadcast networks/VLANs, as is standard for MOS deployments.
+
 ---
 
 ## MCP tools
@@ -154,7 +221,16 @@ At `web.addr` (default <http://127.0.0.1:8088>) you can:
 - **Test** a peer (heartbeat + `reqMachInfo`) and see its reported capabilities
 - Watch the inbox of messages received from a connected NCS
 
-The console is a single embedded HTML page — no separate server or build step.
+The console is a single embedded HTML page — no separate server or build step,
+and it reads and writes the same config file the CLI uses.
+
+![MOS-MCP admin console](docs/screenshots/console-overview.png)
+
+Clicking **Test** dials the peer and runs a heartbeat plus `reqMachInfo`, showing
+whether it is reachable and which profiles it reports — the manual capability
+check that stands in for MOS's absent discovery:
+
+![Testing a peer connection](docs/screenshots/console-test.png)
 
 ---
 
