@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MOS-MCP Console</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --border: #d8dce3; --text: #1c2330;
+    --muted: #667085; --accent: #2f6fed; --accent-fg: #fff; --ok: #1a7f47;
+    --err: #c02636; --code-bg: #f0f2f5; --shadow: 0 1px 3px rgba(16,24,40,.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1419; --panel: #171d26; --border: #2a323e; --text: #e6eaf0;
+      --muted: #9aa5b4; --accent: #4d86f7; --accent-fg: #fff; --ok: #4ec27f;
+      --err: #f2647a; --code-bg: #0c1116; --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+         background: var(--bg); color: var(--text); }
+  header { padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--panel);
+           display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; }
+  header .id { color: var(--muted); font-size: 13px; }
+  main { max-width: 960px; margin: 0 auto; padding: 20px; display: grid; gap: 20px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+          padding: 16px 18px; box-shadow: var(--shadow); }
+  .card h2 { font-size: 15px; margin: 0 0 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; }
+  .dot.on { background: var(--ok); } .dot.off { background: var(--muted); opacity: .4; }
+  form.row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; align-items: end; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+  input { width: 100%; padding: 7px 8px; border: 1px solid var(--border); border-radius: 6px;
+          background: var(--bg); color: var(--text); font: inherit; }
+  button { padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel);
+           color: var(--text); font: inherit; cursor: pointer; }
+  button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  button.danger { color: var(--err); }
+  button:hover { filter: brightness(1.05); }
+  .actions { display: flex; gap: 6px; }
+  .muted { color: var(--muted); }
+  pre { background: var(--code-bg); padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 12px; margin: 0; }
+  .msg { padding: 8px 10px; border-radius: 6px; font-size: 13px; margin-top: 10px; display: none; }
+  .msg.ok { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); display: block; }
+  .msg.err { background: color-mix(in srgb, var(--err) 15%, transparent); color: var(--err); display: block; }
+  .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .pill { font-size: 12px; padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>MOS-MCP Console</h1>
+  <span class="id" id="identity">…</span>
+  <span class="pill" id="profiles"></span>
+  <span class="pill" id="device"></span>
+</header>
+<main>
+  <section class="card">
+    <div class="toolbar">
+      <h2 style="margin:0;flex:1">Peers</h2>
+      <button onclick="refresh()">Refresh</button>
+    </div>
+    <table>
+      <thead><tr><th>Name</th><th>Host</th><th>Ports (L/U/Q)</th><th>Connected</th><th></th></tr></thead>
+      <tbody id="peers"></tbody>
+    </table>
+    <div id="peerMsg" class="msg"></div>
+  </section>
+
+  <section class="card">
+    <h2>Add / update peer</h2>
+    <form class="row" id="peerForm" onsubmit="return addPeer(event)">
+      <div><label>Name</label><input name="name" required placeholder="vizrt" /></div>
+      <div><label>Host</label><input name="host" required placeholder="10.0.0.5" /></div>
+      <div><label>Lower port</label><input name="lowerPort" type="number" placeholder="10540" /></div>
+      <div><label>Upper port</label><input name="upperPort" type="number" placeholder="10541" /></div>
+      <div><label>Query port</label><input name="queryPort" type="number" placeholder="10542" /></div>
+      <div class="actions">
+        <button type="button" onclick="testPeer()">Test</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+    <div id="testMsg" class="msg"></div>
+    <pre id="testOut" style="display:none;margin-top:10px"></pre>
+  </section>
+
+  <section class="card">
+    <div class="toolbar">
+      <h2 style="margin:0;flex:1">Inbox <span class="muted" id="inboxCount"></span></h2>
+      <button onclick="loadInbox()">Refresh</button>
+    </div>
+    <div id="inbox" class="muted">No messages.</div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+async function api(path, opts) {
+  const res = await fetch(path, opts);
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || res.statusText);
+  return body;
+}
+function flash(el, ok, text) {
+  el.className = "msg " + (ok ? "ok" : "err");
+  el.textContent = text;
+}
+function form2peer() {
+  const f = $("peerForm");
+  const num = (v) => v ? parseInt(v, 10) : 0;
+  return {
+    name: f.name.value.trim(), host: f.host.value.trim(),
+    lowerPort: num(f.lowerPort.value), upperPort: num(f.upperPort.value), queryPort: num(f.queryPort.value),
+  };
+}
+
+async function refresh() {
+  try {
+    const st = await api("/api/status");
+    $("identity").textContent = `mosID=${st.identity.mosID}  ncsID=${st.identity.ncsID}`;
+    $("profiles").textContent = "profiles " + (st.enabledProfiles || "");
+    $("device").textContent = st.deviceActive ? "device: listening" : "device: off";
+    const peers = st.peers || [];
+    $("peers").innerHTML = peers.length ? peers.map(p => `
+      <tr>
+        <td>${esc(p.name)}</td>
+        <td>${esc(p.host)}</td>
+        <td>${p.lowerPort}/${p.upperPort}/${p.queryPort}</td>
+        <td>
+          <span class="dot ${p.lowerConnected?'on':'off'}"></span>L
+          <span class="dot ${p.upperConnected?'on':'off'}"></span>U
+          <span class="dot ${p.queryConnected?'on':'off'}"></span>Q
+        </td>
+        <td class="actions">
+          <button onclick='fillPeer(${JSON.stringify(p)})'>Edit</button>
+          <button class="danger" onclick="delPeer('${esc(p.name)}')">Delete</button>
+        </td>
+      </tr>`).join("") : `<tr><td colspan="5" class="muted">No peers configured.</td></tr>`;
+  } catch (e) { flash($("peerMsg"), false, e.message); }
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fillPeer(p) {
+  const f = $("peerForm");
+  f.name.value = p.name; f.host.value = p.host;
+  f.lowerPort.value = p.lowerPort || ""; f.upperPort.value = p.upperPort || ""; f.queryPort.value = p.queryPort || "";
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+}
+async function addPeer(ev) {
+  ev.preventDefault();
+  try {
+    await api("/api/peers", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(form2peer()) });
+    flash($("peerMsg"), true, "Peer saved.");
+    $("peerForm").reset(); refresh();
+  } catch (e) { flash($("peerMsg"), false, e.message); }
+  return false;
+}
+async function delPeer(name) {
+  if (!confirm(`Delete peer "${name}"?`)) return;
+  try { await api("/api/peers?name=" + encodeURIComponent(name), { method: "DELETE" }); refresh(); }
+  catch (e) { flash($("peerMsg"), false, e.message); }
+}
+async function testPeer() {
+  $("testOut").style.display = "none";
+  flash($("testMsg"), true, "Testing…");
+  try {
+    const r = await api("/api/peers/test", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(form2peer()) });
+    if (r.reachable && !r.error) {
+      const profs = (r.machineInfo && r.machineInfo.supportedProfiles && r.machineInfo.supportedProfiles.mosProfile || [])
+        .map(p => p.number).join(",");
+      flash($("testMsg"), true, `Reachable. ${r.machineInfo ? "model="+(r.machineInfo.model||"?")+" profiles="+profs : ""}`);
+    } else {
+      flash($("testMsg"), false, r.error || "Not reachable.");
+    }
+    $("testOut").textContent = JSON.stringify(r, null, 2);
+    $("testOut").style.display = "block";
+  } catch (e) { flash($("testMsg"), false, e.message); }
+}
+async function loadInbox() {
+  try {
+    const items = await api("/api/inbox?limit=50");
+    $("inboxCount").textContent = items.length ? `(${items.length})` : "";
+    $("inbox").innerHTML = items.length ? items.map(m => `
+      <details style="margin-bottom:6px">
+        <summary><strong>${esc(m.type)}</strong> <span class="muted">from ${esc(m.peer)} · ${new Date(m.received).toLocaleString()}</span></summary>
+        <pre>${esc(m.xml)}</pre>
+      </details>`).join("") : `<span class="muted">No messages.</span>`;
+  } catch (e) { $("inbox").textContent = e.message; }
+}
+refresh(); loadInbox();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+# GoReleaser configuration. See https://goreleaser.com
+# Validate locally with:  goreleaser check
+# Build a local snapshot with:  goreleaser release --snapshot --clean
+version: 2
+
+project_name: mos-mcp
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: mos-mcp
+    main: ./cmd/mos-mcp
+    binary: mos-mcp
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/medcelerate/MOS-MCP/internal/version.Version={{ .Version }}
+      - -X github.com/medcelerate/MOS-MCP/internal/version.Commit={{ .ShortCommit }}
+      - -X github.com/medcelerate/MOS-MCP/internal/version.Date={{ .Date }}
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    files:
+      - README.md
+      - LICENSE
+      - config.example.yaml
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-snapshot"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+release:
+  github:
+    owner: medcelerate
+    name: MOS-MCP
+  draft: false
+  prerelease: auto
+  name_template: "v{{ .Version }}"

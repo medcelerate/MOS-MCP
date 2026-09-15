@@ -1,0 +1,57 @@
+# MOS-MCP bridge configuration.
+# Copy to config.yaml and edit. All fields have defaults; unset fields fall back
+# to them. Selected values can also be overridden with MOSMCP_* environment
+# variables (see README). The admin web console reads and writes this file.
+
+# This bridge's identity on the MOS network.
+mosID: mos-mcp.bridge
+ncsID: mos-mcp.ncs
+
+# client = dial out to MOS peers, device = listen for an NCS, both = do both.
+role: both
+
+# MOS profiles to enable. Tools and device replies are gated on this set.
+#   0 = connection (heartbeat, machine info)   1 = objects
+#   2 = running orders                         3 = object search
+#   4 = stories / advanced running orders
+profiles: [0, 1, 2, 3, 4]
+
+# Remote MOS systems to connect to (client role). Ports default to the MOS
+# standard 10540 (lower/objects), 10541 (upper/running orders), 10542 (query).
+peers:
+  - name: vizrt-graphics
+    host: 10.0.0.5
+    lowerPort: 10540
+    upperPort: 10541
+    queryPort: 10542
+  # - name: enps
+  #   host: 10.0.0.10
+
+# Ports the device server binds when acting as a MOS device (device role).
+listen:
+  lowerPort: 10540
+  upperPort: 10541
+  queryPort: 10542
+
+# Advertised in reqMachInfo responses.
+device:
+  manufacturer: mos-mcp
+  model: MOS-MCP Bridge
+  swRev: 0.1.0
+
+# How AI clients connect to the MCP side. transport: stdio | http | both.
+mcp:
+  transport: stdio
+  http:
+    addr: 127.0.0.1:8080
+
+# Embedded admin console (loopback by default).
+web:
+  enabled: true
+  addr: 127.0.0.1:8088
+
+log:
+  level: info
+
+dialTimeoutSeconds: 10
+inboxCapacity: 200
