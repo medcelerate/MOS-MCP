@@ -221,8 +221,9 @@ At `web.addr` (default <http://127.0.0.1:8088>) you can:
 - **Test** a peer (heartbeat + `reqMachInfo`) and see its reported capabilities
 - Watch the inbox of messages received from a connected NCS
 
-The console is a single embedded HTML page — no separate server or build step,
-and it reads and writes the same config file the CLI uses.
+The console is a single embedded HTML page styled with Tailwind CSS (compiled
+ahead of time, no Node.js at build), and it reads and writes the same config
+file the CLI uses.
 
 ![MOS-MCP admin console](docs/screenshots/console-overview.png)
 
@@ -237,10 +238,21 @@ check that stands in for MOS's absent discovery:
 ## Development
 
 ```bash
-go build ./...          # build
-go test ./...           # unit + integration tests
-go vet ./...            # static checks
+make build   # go build ./...
+make test    # go test ./...
+make vet     # go vet ./...
+make css     # regenerate the admin console's embedded Tailwind CSS
 ```
+
+### Admin console styling (Tailwind)
+
+The console is styled with [Tailwind CSS](https://tailwindcss.com), compiled by
+the **standalone Tailwind CLI** (no Node.js required). The source lives in
+[`internal/web/input.css`](internal/web/input.css); running `make css` downloads
+the CLI to `.tools/` and generates [`internal/web/static/tailwind.css`](internal/web/static/tailwind.css),
+which is committed and embedded via `go:embed`. Because the generated CSS is
+committed, `go build` and `go install` stay self-contained — you only need to run
+`make css` after changing the console markup or the input CSS.
 
 Cross-platform archives are produced by [GoReleaser](https://goreleaser.com):
 

@@ -3,6 +3,9 @@
 /dist/
 *.exe
 
+# Downloaded build tools (Tailwind CLI)
+/.tools/
+
 # Local config (do not commit real deployment config)
 /config.yaml
 
