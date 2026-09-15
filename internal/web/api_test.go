@@ -80,7 +80,7 @@ func TestTestPeerAgainstDevice(t *testing.T) {
 	// Stand up a device server so the test endpoint has something to probe.
 	devID := messages.Identity{MosID: "d.mos", NcsID: "d.ncs"}
 	dev := mos.NewDeviceServer(devID, mos.NewInbox(4), &messages.ListMachInfo{Model: "Probe"}, nil)
-	t.Cleanup(func() { dev.Close() })
+	t.Cleanup(func() { _ = dev.Close() })
 	ln := mustListen(t)
 	dev.AddListener(ln)
 

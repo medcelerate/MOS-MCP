@@ -17,7 +17,7 @@ func TestClientDeviceRoundTrip(t *testing.T) {
 	inbox := NewInbox(10)
 	machInfo := &messages.ListMachInfo{Model: "Test Device", MosRev: "2.8.5"}
 	dev := NewDeviceServer(devID, inbox, machInfo, nil)
-	defer dev.Close()
+	defer func() { _ = dev.Close() }()
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -34,7 +34,7 @@ func TestClientDeviceRoundTrip(t *testing.T) {
 		UpperPort: port,
 		QueryPort: port,
 	}, ncsID, 3*time.Second)
-	defer peer.Close()
+	defer func() { _ = peer.Close() }()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
