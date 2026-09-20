@@ -31,6 +31,7 @@ CGO_ENABLED=0 GOOS="$GOOS" GOARCH="$GOARCH" go build \
   -o "$STAGE/server/${BIN}${EXT}" ./cmd/mos-mcp
 
 cp mcpb/manifest.json "$STAGE/manifest.json"
+[ -f mcpb/icon.png ] && cp mcpb/icon.png "$STAGE/icon.png"
 
 # Prefer the official mcpb CLI (validates the manifest); fall back to zip.
 if command -v mcpb >/dev/null 2>&1; then

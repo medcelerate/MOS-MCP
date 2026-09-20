@@ -13,6 +13,7 @@
   "documentation": "https://github.com/medcelerate/MOS-MCP/blob/main/README.md",
   "support": "https://github.com/medcelerate/MOS-MCP/issues",
   "license": "MIT",
+  "icon": "icon.png",
   "keywords": ["mos", "broadcast", "newsroom", "ncs", "rundown", "running-order"],
   "privacy_policies": [
     "https://github.com/medcelerate/MOS-MCP/blob/main/PRIVACY.md"
