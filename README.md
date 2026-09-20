@@ -221,9 +221,8 @@ At `web.addr` (default <http://127.0.0.1:8088>) you can:
 - **Test** a peer (heartbeat + `reqMachInfo`) and see its reported capabilities
 - Watch the inbox of messages received from a connected NCS
 
-The console is a single embedded HTML page styled with Tailwind CSS (compiled
-ahead of time, no Node.js at build), and it reads and writes the same config
-file the CLI uses.
+The console is a single page built into the binary — there's nothing extra to
+install or run — and it reads and writes the same config file the CLI uses.
 
 ![MOS-MCP admin console](docs/screenshots/console-overview.png)
 
@@ -235,58 +234,16 @@ check that stands in for MOS's absent discovery:
 
 ---
 
-## Development
+## Building from source
 
 ```bash
-make build   # go build ./...
-make test    # go test ./...
-make vet     # go vet ./...
-make css     # regenerate the admin console's embedded Tailwind CSS
+make build   # compile
+make test    # run the tests
 ```
 
-### Admin console styling (Tailwind)
-
-The console is styled with [Tailwind CSS](https://tailwindcss.com), compiled by
-the **standalone Tailwind CLI** (no Node.js required). The source lives in
-[`internal/web/input.css`](internal/web/input.css); running `make css` downloads
-the CLI to `.tools/` and generates [`internal/web/static/tailwind.css`](internal/web/static/tailwind.css),
-which is committed and embedded via `go:embed`. Because the generated CSS is
-committed, `go build` and `go install` stay self-contained — you only need to run
-`make css` after changing the console markup or the input CSS.
-
-Cross-platform archives are produced by [GoReleaser](https://goreleaser.com):
-
-```bash
-goreleaser check                        # validate config
-goreleaser release --snapshot --clean   # build local snapshot into ./dist
-```
-
-### CI
-
-- **CI** (`.github/workflows/ci.yml`) runs vet, race tests, and build on Linux,
-  macOS, and Windows for every push and PR, plus golangci-lint.
-- **Release** (`.github/workflows/release.yml`) runs GoReleaser on any `v*` tag,
-  cross-compiling all targets and publishing a GitHub Release with checksums.
-
-To cut a release:
-
-```bash
-git tag v0.1.0
-git push origin v0.1.0
-```
-
----
-
-## Project layout
-
-```
-cmd/mos-mcp        entrypoint (flags, wiring, transport selection)
-internal/config    YAML config: load, validate, save, env overrides
-internal/mos       MOS TCP layer: framing, connections, peers, device server, manager
-  └ messages       encoding/xml structs for MOS profiles 0–4
-internal/mcpserver MCP server and tool handlers (gated by profile)
-internal/web       embedded admin console + JSON API
-```
+A plain `go build` (or `go install`) is all you need — the console and its
+styling are prebuilt and committed, so the result is one self-contained binary
+with no extra tooling.
 
 ## License
 
