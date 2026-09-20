@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
+          go-version: "1.25"
           cache: true
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
@@ -27,3 +27,24 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Build the cross-platform Claude Desktop Extension (.mcpb) on macOS so the
+  # bundled macOS binary can be made universal (Intel + Apple Silicon) with lipo,
+  # then attach it to the release GoReleaser created.
+  mcpb:
+    needs: goreleaser
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+      - name: Build .mcpb bundle
+        run: sh scripts/build-mcpb.sh
+      - name: Upload bundle to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${GITHUB_REF_NAME}" dist/*-universal.mcpb --clobber
