@@ -20,9 +20,9 @@
   ],
   "server": {
     "type": "binary",
-    "entry_point": "server/mos-mcp",
+    "entry_point": "server/mos-mcp-darwin",
     "mcp_config": {
-      "command": "${__dirname}/server/mos-mcp",
+      "command": "${__dirname}/server/mos-mcp-darwin",
       "args": [],
       "env": {
         "MOSMCP_CONFIG": "${user_config.config_path}",
@@ -30,6 +30,11 @@
         "MOSMCP_MOSID": "${user_config.mos_id}",
         "MOSMCP_NCSID": "${user_config.ncs_id}",
         "MOSMCP_WEB_ENABLED": "${user_config.web_enabled}"
+      },
+      "platform_overrides": {
+        "darwin": { "command": "${__dirname}/server/mos-mcp-darwin" },
+        "linux": { "command": "${__dirname}/server/mos-mcp-linux" },
+        "win32": { "command": "${__dirname}/server/mos-mcp-win32.exe" }
       }
     }
   },
