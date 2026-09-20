@@ -234,6 +234,38 @@ check that stands in for MOS's absent discovery:
 
 ---
 
+## Use it as a connector
+
+The bridge speaks the Model Context Protocol, so it plugs into AI clients as a
+connector. All tools carry titles and read-only / destructive annotations, so
+clients can show clear permission prompts.
+
+### Claude Desktop extension (recommended)
+
+Because the bridge has to run next to your MOS network, the natural fit is a
+local **Desktop Extension** — a one-click `.mcpb` bundle:
+
+```bash
+sh scripts/build-mcpb.sh          # dist/mos-mcp-<version>-<os>-<arch>.mcpb
+# GOOS=windows GOARCH=amd64 sh scripts/build-mcpb.sh   # build for another OS
+```
+
+Open the resulting `.mcpb` in Claude Desktop (**Settings → Extensions**, or just
+double-click it). Claude runs the bundled binary locally over stdio; set your MOS
+ID, role, and an optional config file in the extension's settings. This can be
+submitted to Anthropic's directory via the
+[desktop-extension form](https://clau.de/desktop-extention-submission).
+
+### Remote connector (Claude custom connector / ChatGPT)
+
+Both Claude (custom connectors) and OpenAI (ChatGPT connectors and the Responses
+API's `tools: [{ "type": "mcp" }]`) can add a **remote** MCP server over
+Streamable HTTP. Run the bridge with `mcp.transport: http` and point the client
+at `http://<host>:8080`. Since the server must be reachable from the AI provider
+— and directory listings require OAuth — this path suits a self-hosted,
+internet-exposed deployment behind TLS and authentication. The tools are
+identical to the desktop-extension path.
+
 ## Building from source
 
 ```bash
@@ -244,6 +276,12 @@ make test    # run the tests
 A plain `go build` (or `go install`) is all you need — the console and its
 styling are prebuilt and committed, so the result is one self-contained binary
 with no extra tooling.
+
+## Privacy Policy
+
+`mos-mcp` runs on your own infrastructure and talks only to the MOS peers you
+configure. It sends no data to the author, Anthropic, OpenAI, or any third
+party, and includes no telemetry. See [PRIVACY.md](PRIVACY.md) for details.
 
 ## License
 

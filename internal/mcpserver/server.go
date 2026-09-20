@@ -61,3 +61,22 @@ func textResult(summary string) *mcp.CallToolResult {
 		Content: []mcp.Content{&mcp.TextContent{Text: summary}},
 	}
 }
+
+func boolPtr(b bool) *bool { return &b }
+
+// annRead builds annotations for a read-only tool (does not modify anything).
+func annRead(title string) *mcp.ToolAnnotations {
+	return &mcp.ToolAnnotations{Title: title, ReadOnlyHint: true}
+}
+
+// annWrite builds annotations for a tool that makes additive, non-destructive
+// changes.
+func annWrite(title string) *mcp.ToolAnnotations {
+	return &mcp.ToolAnnotations{Title: title, DestructiveHint: boolPtr(false)}
+}
+
+// annDestructive builds annotations for a tool that may overwrite or remove
+// existing state.
+func annDestructive(title string) *mcp.ToolAnnotations {
+	return &mcp.ToolAnnotations{Title: title, DestructiveHint: boolPtr(true)}
+}

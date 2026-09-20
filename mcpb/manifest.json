@@ -1,0 +1,92 @@
+{
+  "manifest_version": "0.3",
+  "name": "mos-mcp",
+  "display_name": "MOS Bridge",
+  "version": "0.1.0",
+  "description": "Bridge Claude to broadcast newsroom systems over the MOS protocol: query media objects, build and send running orders, search object databases, and read from a live NCS.",
+  "long_description": "mos-mcp connects the MOS (Media Object Server) protocol used by broadcast newsroom systems (ENPS, iNEWS, video servers, graphics) to the Model Context Protocol. It can act as a MOS client, a MOS device, or both, and exposes MOS Profiles 0-4 as tools. Runs entirely on your own network; it only talks to the MOS peers you configure.",
+  "author": {
+    "name": "Evan Clark",
+    "url": "https://github.com/medcelerate/MOS-MCP"
+  },
+  "homepage": "https://github.com/medcelerate/MOS-MCP",
+  "documentation": "https://github.com/medcelerate/MOS-MCP/blob/main/README.md",
+  "support": "https://github.com/medcelerate/MOS-MCP/issues",
+  "license": "MIT",
+  "keywords": ["mos", "broadcast", "newsroom", "ncs", "rundown", "running-order"],
+  "privacy_policies": [
+    "https://github.com/medcelerate/MOS-MCP/blob/main/PRIVACY.md"
+  ],
+  "server": {
+    "type": "binary",
+    "entry_point": "server/mos-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/server/mos-mcp",
+      "args": [],
+      "env": {
+        "MOSMCP_CONFIG": "${user_config.config_path}",
+        "MOSMCP_ROLE": "${user_config.role}",
+        "MOSMCP_MOSID": "${user_config.mos_id}",
+        "MOSMCP_NCSID": "${user_config.ncs_id}",
+        "MOSMCP_WEB_ENABLED": "${user_config.web_enabled}"
+      }
+    }
+  },
+  "user_config": {
+    "config_path": {
+      "type": "file",
+      "title": "Config file",
+      "description": "Optional path to a mos-mcp YAML config file defining peers, role and profiles. Leave blank to configure peers from the admin console instead.",
+      "required": false
+    },
+    "role": {
+      "type": "string",
+      "title": "Role",
+      "description": "client (dial out to MOS peers), device (listen for a newsroom system), or both.",
+      "default": "both",
+      "required": false
+    },
+    "mos_id": {
+      "type": "string",
+      "title": "MOS ID",
+      "description": "How this bridge identifies itself on the MOS network (e.g. bridge.yourstation.com).",
+      "required": false
+    },
+    "ncs_id": {
+      "type": "string",
+      "title": "NCS ID",
+      "description": "The newsroom-system identifier this bridge uses (e.g. newsroom.yourstation.com).",
+      "required": false
+    },
+    "web_enabled": {
+      "type": "boolean",
+      "title": "Enable admin console",
+      "description": "Serve the loopback admin console (http://127.0.0.1:8088) for managing peers.",
+      "default": true,
+      "required": false
+    }
+  },
+  "tools_generated": false,
+  "tools": [
+    { "name": "mos_status", "description": "Bridge identity, peers, connection state and inbox size." },
+    { "name": "mos_add_peer", "description": "Register an outbound MOS peer to connect to." },
+    { "name": "mos_remove_peer", "description": "Unregister a MOS peer and close its connections." },
+    { "name": "mos_heartbeat", "description": "Verify a peer connection is alive." },
+    { "name": "mos_request_machine_info", "description": "Query a peer's identity and supported profiles." },
+    { "name": "mos_inbox", "description": "Recent messages received while acting as a MOS device." },
+    { "name": "mos_send_raw", "description": "Send an arbitrary MOS XML message to a peer." },
+    { "name": "mos_request_object", "description": "Fetch a single media object description by ID." },
+    { "name": "mos_request_all_objects", "description": "Fetch descriptions of all media objects from a peer." },
+    { "name": "mos_search_objects", "description": "Search a peer's object database." },
+    { "name": "mos_create_running_order", "description": "Create a running order with stories and items." },
+    { "name": "mos_replace_running_order", "description": "Replace the contents of a running order." },
+    { "name": "mos_delete_running_order", "description": "Delete a running order by ID." },
+    { "name": "mos_element_action", "description": "Insert, replace, move, swap or delete running-order elements." },
+    { "name": "mos_ready_to_air", "description": "Signal whether a running order is ready to air." },
+    { "name": "mos_send_story", "description": "Send the full body of a single story to a peer." },
+    { "name": "mos_request_all_running_orders", "description": "List running orders known to a peer." }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"]
+  }
+}

@@ -15,26 +15,31 @@ func registerRoTools(s *mcp.Server, d *deps) {
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "mos_create_running_order",
 			Description: "Create a new running order (rundown/playlist) on a peer with the given stories and items (Profile 2, roCreate).",
+			Annotations: annWrite("Create running order"),
 		}, d.createRunningOrder)
 
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "mos_replace_running_order",
 			Description: "Replace the entire contents of an existing running order on a peer (Profile 2, roReplace).",
+			Annotations: annDestructive("Replace running order"),
 		}, d.replaceRunningOrder)
 
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "mos_delete_running_order",
 			Description: "Delete a running order from a peer by ID (Profile 2, roDelete).",
+			Annotations: annDestructive("Delete running order"),
 		}, d.deleteRunningOrder)
 
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "mos_element_action",
 			Description: "Modify a running order's elements: INSERT, REPLACE, MOVE, SWAP or DELETE stories/items (Profile 2, roElementAction).",
+			Annotations: annDestructive("Modify running-order elements"),
 		}, d.elementAction)
 
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "mos_ready_to_air",
 			Description: "Signal whether a running order is ready to air (Profile 2, roReadyToAir).",
+			Annotations: annWrite("Set ready-to-air"),
 		}, d.readyToAir)
 	}
 
@@ -42,11 +47,13 @@ func registerRoTools(s *mcp.Server, d *deps) {
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "mos_send_story",
 			Description: "Send the full body of a single story, including narrative paragraphs and item references, to a peer (Profile 4, roStorySend).",
+			Annotations: annWrite("Send story"),
 		}, d.sendStory)
 
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "mos_request_all_running_orders",
 			Description: "Request descriptors for all running orders known to a peer (Profile 4, roReqAll).",
+			Annotations: annRead("List running orders"),
 		}, d.requestAllRunningOrders)
 	}
 }

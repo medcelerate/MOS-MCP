@@ -1,7 +1,9 @@
-# Binaries
+# Binaries and build output
 /mos-mcp
 /dist/
+/build/
 *.exe
+*.mcpb
 
 # Downloaded build tools (Tailwind CLI)
 /.tools/

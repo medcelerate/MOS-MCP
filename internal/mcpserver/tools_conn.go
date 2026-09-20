@@ -16,36 +16,43 @@ func registerConnTools(s *mcp.Server, d *deps) {
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "mos_status",
 		Description: "Report the bridge's MOS identity, configured peers and their connection state, whether the device listener is active, and the inbox size.",
+		Annotations: annRead("MOS bridge status"),
 	}, d.status)
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "mos_add_peer",
 		Description: "Register an outbound MOS peer (a newsroom system or media device) to connect to. Ports default to the MOS standard 10540/10541/10542. The peer is added in memory for this session; add it to the config file or the web console to persist it.",
+		Annotations: annWrite("Add MOS peer"),
 	}, d.addPeer)
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "mos_remove_peer",
 		Description: "Unregister a previously added MOS peer and close its connections.",
+		Annotations: annDestructive("Remove MOS peer"),
 	}, d.removePeer)
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "mos_heartbeat",
 		Description: "Send a MOS heartbeat to a peer to verify the connection is alive. Returns the peer's echoed heartbeat.",
+		Annotations: annRead("Send MOS heartbeat"),
 	}, d.heartbeat)
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "mos_request_machine_info",
 		Description: "Send reqMachInfo to a peer and return its listMachInfo response: manufacturer, model, revisions and supported MOS profiles. This is the closest thing MOS has to capability discovery.",
+		Annotations: annRead("Request machine info"),
 	}, d.requestMachineInfo)
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "mos_inbox",
 		Description: "Return the most recent MOS messages received from newsroom systems while the bridge is acting as a MOS device (newest first).",
+		Annotations: annRead("View MOS inbox"),
 	}, d.inbox)
 
 	mcp.AddTool(s, &mcp.Tool{
 		Name:        "mos_send_raw",
 		Description: "Send a raw MOS XML message (a full <mos>...</mos> document, or just the inner body element) to a peer and return the raw XML reply. Use for message types not covered by a dedicated tool, or for debugging.",
+		Annotations: annDestructive("Send raw MOS message"),
 	}, d.sendRaw)
 }
 

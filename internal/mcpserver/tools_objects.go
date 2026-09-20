@@ -15,11 +15,13 @@ func registerObjectTools(s *mcp.Server, d *deps) {
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "mos_request_object",
 			Description: "Request the description of a single media object from a peer by object ID (Profile 1).",
+			Annotations: annRead("Request media object"),
 		}, d.requestObject)
 
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "mos_request_all_objects",
 			Description: "Request descriptions of all media objects from a peer (Profile 1, mosReqAll). Returns a mosListAll of objects.",
+			Annotations: annRead("Request all objects"),
 		}, d.requestAllObjects)
 	}
 
@@ -27,6 +29,7 @@ func registerObjectTools(s *mcp.Server, d *deps) {
 		mcp.AddTool(s, &mcp.Tool{
 			Name:        "mos_search_objects",
 			Description: "Search a peer's object database (Profile 3, mosReqObjList) using a general text query with optional paging. Returns matching object descriptions.",
+			Annotations: annRead("Search media objects"),
 		}, d.searchObjects)
 	}
 }
